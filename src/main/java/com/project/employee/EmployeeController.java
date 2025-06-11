@@ -24,18 +24,18 @@ public class EmployeeController {
     }
 
     @GetMapping("/employees")
-    public List<EmployeeResponseDto> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    public ResponseEntity<List<EmployeeResponseDto>> getAllEmployees() {
+        return new ResponseEntity<>(employeeService.getAllEmployees(), HttpStatus.OK);
     }
 
     @GetMapping("/employees/{id}")
     public ResponseEntity<EmployeeResponseDto> getEmployeeById(@PathVariable("id") int id) {
-        return  new ResponseEntity<>(employeeService.getEmployeeById(id), HttpStatus.OK);
+        return new ResponseEntity<>(employeeService.getEmployeeById(id), HttpStatus.OK);
     }
 
     @DeleteMapping("/employees/{id}")
-    public boolean removeEmployee(@PathVariable("id") int id) {
-        return employeeService.removeEmployee(id);
+    public ResponseEntity<Boolean> removeEmployee(@PathVariable("id") int id) {
+        return new ResponseEntity<>(employeeService.removeEmployee(id), HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping("/employees/{id}")
