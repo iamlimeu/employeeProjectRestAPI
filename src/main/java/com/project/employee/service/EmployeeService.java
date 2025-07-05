@@ -11,64 +11,63 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-
-import static com.project.employee.mappers.EmployeeMapper.mapToEntity;
-import static com.project.employee.mappers.EmployeeMapper.mapToResponseDto;
 
 @Service
 @RequiredArgsConstructor
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final EmployeeMapper mapper;
 
     public EmployeeResponseDto addEmployee(EmployeeRequestDto employeeRequestDto) {
-        EmployeeEntity newEntity = mapToEntity(employeeRequestDto);
-        EmployeeEntity employeeEntity = employeeRepository.addEmployee(newEntity);
-        return mapToResponseDto(employeeEntity);
+        EmployeeEntity newEntity = mapper.toEntity(employeeRequestDto);
+        EmployeeEntity savedEntity = employeeRepository.save(newEntity);
+        return mapper.toResponseDto(savedEntity);
     }
 
     public List<EmployeeResponseDto> getAllEmployees() {
-        if (employeeRepository.getAllEmployees().isEmpty()) {
+        List<EmployeeEntity> employees = employeeRepository.findAll();
+        if (employees.isEmpty()) {
             throw new ResourceNotFoundException("Not single employee created yet");
         }
-        return employeeRepository.getAllEmployees().stream()
-                .map(EmployeeMapper::mapToResponseDto)
+        return employees.stream()
+                .map(mapper::toResponseDto)
                 .toList();
     }
 
-    public EmployeeResponseDto getEmployeeById(int id) {
-        Optional<EmployeeEntity> optionalEmployee = employeeRepository.getEmployeeById(id);
-        if (optionalEmployee.isEmpty()) {
-            throw new ResourceNotFoundException("Employee with id " + id + " does not exist.");
-        }
-        return mapToResponseDto(optionalEmployee.get());
+    public EmployeeResponseDto getEmployeeById(Long id) {
+        EmployeeEntity entity = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+        return mapper.toResponseDto(entity);
     }
 
-    public boolean removeEmployee(int id) {
-        if (employeeRepository.getEmployeeById(id).isEmpty()) {
-            throw new BadRequestException("There is already no employee with id: " + id);
+    public void removeEmployee(Long id) {
+        if (employeeRepository.findById(id).isEmpty()) {
+            throw new BadRequestException("Employee not found with id: " + id);
         }
-        return employeeRepository.removeEmployee(id);
+        employeeRepository.deleteById(id);
     }
 
-    public EmployeeResponseDto updateEmployee(int id, EmployeeRequestDto updatedEmployeeEntity) {
-        EmployeeEntity employeeEntity = mapToEntity(updatedEmployeeEntity);
-        if (updatedEmployeeEntity.getFirstName() != null) {
-            employeeEntity.setFirstName(updatedEmployeeEntity.getFirstName());
+    public EmployeeResponseDto updateEmployee(Long id, EmployeeRequestDto dto) {
+        EmployeeEntity entity = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+
+        if (dto.getFirstName() != null) {
+            entity.setFirstName(dto.getFirstName());
         }
-        if (updatedEmployeeEntity.getLastName() != null) {
-            employeeEntity.setLastName(updatedEmployeeEntity.getLastName());
+        if (dto.getLastName() != null) {
+            entity.setLastName(dto.getLastName());
         }
-        if (updatedEmployeeEntity.getEmail() != null) {
-            employeeEntity.setEmail(updatedEmployeeEntity.getEmail());
+        if (dto.getEmail() != null && !dto.getEmail().equals(entity.getEmail())) {
+            entity.setEmail(dto.getEmail());
         }
-        if (updatedEmployeeEntity.getPassword() != null && !updatedEmployeeEntity.getPassword().isEmpty()) {
-            employeeEntity.setPassword(updatedEmployeeEntity.getPassword());
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            entity.setPassword(dto.getPassword());
         }
-        if (updatedEmployeeEntity.getRole() != null) {
-            employeeEntity.setRole(updatedEmployeeEntity.getRole());
+        if (dto.getRole() != null) {
+            entity.setRole(dto.getRole());
         }
-        return mapToResponseDto(employeeRepository.updateEmployee(id, employeeEntity));
+        EmployeeEntity updatedEntity = employeeRepository.save(entity);
+        return mapper.toResponseDto(updatedEntity);
     }
 }

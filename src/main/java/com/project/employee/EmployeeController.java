@@ -29,17 +29,18 @@ public class EmployeeController {
     }
 
     @GetMapping("/employees/{id}")
-    public ResponseEntity<EmployeeResponseDto> getEmployeeById(@PathVariable("id") int id) {
+    public ResponseEntity<EmployeeResponseDto> getEmployeeById(@PathVariable("id") long id) {
         return new ResponseEntity<>(employeeService.getEmployeeById(id), HttpStatus.OK);
     }
 
     @DeleteMapping("/employees/{id}")
-    public ResponseEntity<Boolean> removeEmployee(@PathVariable("id") int id) {
-        return new ResponseEntity<>(employeeService.removeEmployee(id), HttpStatus.NO_CONTENT);
+    public ResponseEntity<Void> removeEmployee(@PathVariable("id") long id) {
+        employeeService.removeEmployee(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/employees/{id}")
-    public ResponseEntity<EmployeeResponseDto> updateEmployee(@PathVariable("id") int id,
+    public ResponseEntity<EmployeeResponseDto> updateEmployee(@PathVariable("id") long id,
                                                          @Valid @RequestBody EmployeeRequestDto employeeRequestDto) {
         EmployeeResponseDto updatedEmployeeEntity = employeeService.updateEmployee(id, employeeRequestDto);
         return new ResponseEntity<>(updatedEmployeeEntity, HttpStatus.OK);

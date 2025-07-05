@@ -1,18 +1,28 @@
 package com.project.employee.entity;
 
 import com.project.employee.enums.EmployeeRole;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Getter
-@Setter
+
 @Data
+@Entity
+@Table(name = "employees")
+@AllArgsConstructor
+@NoArgsConstructor
 public class EmployeeEntity {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+    @Column(name = "first_name")
     private String firstName;
+    @Column(name = "last_name")
     private String lastName;
+    @Column(name = "email")
     private String email;
+    @Column(name = "password")
     private String password;
+    @Column(name = "role")
     private EmployeeRole role;
 }
