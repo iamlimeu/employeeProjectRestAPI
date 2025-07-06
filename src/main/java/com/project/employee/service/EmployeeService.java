@@ -2,15 +2,20 @@ package com.project.employee.service;
 
 import com.project.employee.dto.EmployeeRequestDto;
 import com.project.employee.dto.EmployeeResponseDto;
+import com.project.employee.dto.PageResponse;
 import com.project.employee.entity.EmployeeEntity;
+import com.project.employee.enums.EmployeeRole;
 import com.project.employee.exception.BadRequestException;
 import com.project.employee.exception.ResourceNotFoundException;
 import com.project.employee.mappers.EmployeeMapper;
 import com.project.employee.repository.EmployeeRepository;
+import com.project.employee.specification.EmployeeSpecification;
+import com.project.employee.utility.PageableAssembler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,14 +30,29 @@ public class EmployeeService {
         return mapper.toResponseDto(savedEntity);
     }
 
-    public List<EmployeeResponseDto> getAllEmployees() {
-        List<EmployeeEntity> employees = employeeRepository.findAll();
-        if (employees.isEmpty()) {
-            throw new ResourceNotFoundException("Not single employee created yet");
-        }
-        return employees.stream()
-                .map(mapper::toResponseDto)
-                .toList();
+    public PageResponse<EmployeeResponseDto> getEmployees(
+            String firstName,
+            String lastName,
+            EmployeeRole role,
+            String emailLike,
+            Pageable pageable
+    ) {
+        Specification<EmployeeEntity> specs = EmployeeSpecification.filter(firstName, lastName, emailLike, role);
+        Page<EmployeeEntity> pageEntity = employeeRepository.findAll(specs, pageable);
+        Page<EmployeeResponseDto> dtoPage = pageEntity.map(mapper::toResponseDto);
+        return toPageResponse(dtoPage);
+    }
+
+    private <T> PageResponse<T> toPageResponse(Page<T> page) {
+        var response = new PageResponse<T>();
+        response.setContent(page.getContent());
+        response.setPageNumber(page.getNumber());
+        response.setPageSize(page.getSize());
+        response.setTotalElements(page.getTotalElements());
+        response.setTotalPages(page.getTotalPages());
+        response.setFirst(page.isFirst());
+        response.setLast(page.isLast());
+        return response;
     }
 
     public EmployeeResponseDto getEmployeeById(Long id) {

@@ -12,7 +12,7 @@ public interface EmployeeMapper {
 
     EmployeeEntity toEntity(EmployeeRequestDto dto);
 
-    @Mapping(target = "info", source = "entity",
+    @Mapping(target = "info", source = ".",
             qualifiedByName = "getEmployeeInfo")
     EmployeeResponseDto toResponseDto(EmployeeEntity entity);
 
