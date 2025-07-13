@@ -1,4 +1,4 @@
-package com.project.employee;
+package com.project.employee.controller;
 
 import com.project.employee.dto.EmployeeRequestDto;
 import com.project.employee.dto.EmployeeResponseDto;
@@ -47,9 +47,8 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/employees/{id}")
-    public ResponseEntity<Void> removeEmployee(@PathVariable("id") long id) {
-        employeeService.removeEmployee(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Long> removeEmployee(@PathVariable("id") long id) {
+        return ResponseEntity.ok(employeeService.removeEmployee(id));
     }
 
     @PatchMapping("/employees/{id}")

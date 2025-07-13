@@ -5,12 +5,10 @@ import com.project.employee.dto.EmployeeResponseDto;
 import com.project.employee.dto.PageResponse;
 import com.project.employee.entity.EmployeeEntity;
 import com.project.employee.enums.EmployeeRole;
-import com.project.employee.exception.BadRequestException;
 import com.project.employee.exception.ResourceNotFoundException;
 import com.project.employee.mappers.EmployeeMapper;
 import com.project.employee.repository.EmployeeRepository;
 import com.project.employee.specification.EmployeeSpecification;
-import com.project.employee.utility.PageableAssembler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,11 +59,11 @@ public class EmployeeService {
         return mapper.toResponseDto(entity);
     }
 
-    public void removeEmployee(Long id) {
-        if (employeeRepository.findById(id).isEmpty()) {
-            throw new BadRequestException("Employee not found with id: " + id);
-        }
-        employeeRepository.deleteById(id);
+    public Long removeEmployee(Long id) {
+        EmployeeEntity employeeEntity = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+        employeeRepository.delete(employeeEntity);
+        return employeeEntity.getId();
     }
 
     public EmployeeResponseDto updateEmployee(Long id, EmployeeRequestDto dto) {
