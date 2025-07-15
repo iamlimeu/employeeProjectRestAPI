@@ -10,6 +10,7 @@ import com.project.employee.exception.ResourceNotFoundException;
 import com.project.employee.mappers.OrderMapper;
 import com.project.employee.repository.CustomerRepository;
 import com.project.employee.repository.OrderRepository;
+import com.project.employee.repository.ProductRepository;
 import com.project.employee.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
     private final OrderMapper mapper;
 
     public OrderResponseDto addOrder(OrderRequestDto orderRequestDto) {
