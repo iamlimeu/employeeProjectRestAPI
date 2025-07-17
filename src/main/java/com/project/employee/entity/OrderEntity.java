@@ -4,13 +4,10 @@ import com.project.employee.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,27 +26,33 @@ public class OrderEntity {
     private LocalDateTime createdDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status",nullable = false)
+    @Column(name = "status", nullable = false)
     private OrderStatus orderStatus;
 
     @ManyToOne()
     @JoinColumn(name = "customer_id")
     private CustomerEntity customer;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "product_order",
-        joinColumns = @JoinColumn(name = "order_id",
-            foreignKey = @ForeignKey(foreignKeyDefinition =
-            "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT")),
-        inverseJoinColumns = @JoinColumn(name = "product_id",
-            foreignKey = @ForeignKey(foreignKeyDefinition =
-            "FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT")))
-    private List<ProductEntity> products;
+        joinColumns = @JoinColumn(name = "order_id"),
+        inverseJoinColumns = @JoinColumn(name = "product_id"))
+    private List<ProductEntity> products = new ArrayList<>();
 
     @PreRemove
     private void checkProductsBeforeDelete() {
         if (!products.isEmpty()) {
             throw new IllegalStateException("Cannot delete order with associated products");
         }
+    }
+
+    public void addProduct(ProductEntity product) {
+        products.add(product);
+        product.getOrders().add(this);
+    }
+
+    public void removeProduct(ProductEntity product) {
+        products.remove(product);
+        product.getOrders().remove(this);
     }
 }

@@ -1,5 +1,6 @@
 package com.project.employee.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -18,7 +19,7 @@ public class ProductRequestDto {
 
     @NotNull
     @DecimalMin(value = "0.00", message = "Price cannot be negative")
-    @DecimalMax(value = "100_000_000.00", message = "Price must not exceed 100,000,000.00")
     @Digits(integer = 9, fraction = 2, message = "Price must have up to 9 integer and 2 decimal digits")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private BigDecimal price;
 }

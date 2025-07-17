@@ -5,6 +5,7 @@ import com.project.employee.dto.OrderResponseDto;
 import com.project.employee.dto.PageResponse;
 import com.project.employee.entity.CustomerEntity;
 import com.project.employee.entity.OrderEntity;
+import com.project.employee.entity.ProductEntity;
 import com.project.employee.enums.OrderStatus;
 import com.project.employee.exception.ResourceNotFoundException;
 import com.project.employee.mappers.OrderMapper;
@@ -19,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,12 +42,23 @@ public class OrderService {
         return mapper.toResponseDto(savedEntity);
     }
 
+    public OrderResponseDto addProductToOrder(Long orderId, Long productId) {
+        OrderEntity orderEntity = orderRepository.findById(orderId).
+                orElseThrow(() -> new ResourceNotFoundException("Order with id: " + orderId + " not found"));
+        ProductEntity productEntity = productRepository.findById(productId).
+                orElseThrow(() -> new ResourceNotFoundException("Product with id: " + productId + " not found"));
+        orderEntity.addProduct(productEntity);
+        OrderEntity savedEntity = orderRepository.save(orderEntity);
+        return mapper.toResponseDto(savedEntity);
+    }
+
     public PageResponse<OrderResponseDto> getAllOrders(
             LocalDateTime createdDate,
             OrderStatus status,
+            Long productId,
             Pageable pageable
     ) {
-        Specification<OrderEntity> specs = OrderSpecification.filter(createdDate, status);
+        Specification<OrderEntity> specs = OrderSpecification.filter(createdDate, status, productId);
         Page<OrderEntity> page = orderRepository.findAll(specs, pageable);
         Page<OrderResponseDto> dtoPage = page.map(mapper::toResponseDto);
         return toPageResponse(dtoPage);
@@ -74,6 +87,16 @@ public class OrderService {
                 orElseThrow(() -> new ResourceNotFoundException("Order with id: " + id + " not found"));
         orderRepository.delete(orderEntity);
         return orderEntity.getId();
+    }
+
+    public List<ProductEntity> removeProductInOrder(Long orderId, Long productId) {
+        OrderEntity orderEntity = orderRepository.findById(orderId).
+                orElseThrow(() -> new ResourceNotFoundException("Order with id: " + orderId + " not found"));
+        ProductEntity productEntity = productRepository.findById(productId).
+                orElseThrow(() -> new ResourceNotFoundException("Product with id: " + productId + " not found"));
+        orderEntity.removeProduct(productEntity);
+        orderRepository.save(orderEntity);
+        return orderEntity.getProducts();
     }
 
     public OrderResponseDto updateOrder(Long id, OrderRequestDto dto) {

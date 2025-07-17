@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,11 +26,11 @@ public class ProductEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "price")
+    @Column(name = "price", precision = 19, scale = 2)
     private BigDecimal price;
 
-    @ManyToMany(mappedBy = "products", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<OrderEntity> orders;
+    @ManyToMany(mappedBy = "products")
+    private List<OrderEntity> orders = new ArrayList<>();
 
     @PreRemove
     private void checkOrdersBeforeDelete() {

@@ -21,10 +21,9 @@ public interface ProductMapper {
         if (entity == null) {
             return null;
         }
-        return String.format("Product: %s | Description: %s | Price: %.2f RUB",
-                entity.getName(),
-                entity.getDescription(),
-                entity.getPrice()
+        return "Product name: " + entity.getName() +
+                " | Description: " + entity.getDescription() +
+                " | Price: " + String.format("%.2f RUB", entity.getPrice()
         );
     }
 }

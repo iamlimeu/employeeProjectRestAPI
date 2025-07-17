@@ -42,17 +42,17 @@ public class EmployeeController {
     }
 
     @GetMapping("/employees/{id}")
-    public ResponseEntity<EmployeeResponseDto> getEmployeeById(@PathVariable("id") long id) {
+    public ResponseEntity<EmployeeResponseDto> getEmployeeById(@PathVariable("id") Long id) {
         return new ResponseEntity<>(employeeService.getEmployeeById(id), HttpStatus.OK);
     }
 
     @DeleteMapping("/employees/{id}")
-    public ResponseEntity<Long> removeEmployee(@PathVariable("id") long id) {
+    public ResponseEntity<Long> removeEmployee(@PathVariable("id") Long id) {
         return ResponseEntity.ok(employeeService.removeEmployee(id));
     }
 
     @PatchMapping("/employees/{id}")
-    public ResponseEntity<EmployeeResponseDto> updateEmployee(@PathVariable("id") long id,
+    public ResponseEntity<EmployeeResponseDto> updateEmployee(@PathVariable("id") Long id,
                                                               @Valid
                                                               @RequestBody EmployeeRequestDto employeeRequestDto) {
         EmployeeResponseDto updatedEmployeeEntity = employeeService.updateEmployee(id, employeeRequestDto);
