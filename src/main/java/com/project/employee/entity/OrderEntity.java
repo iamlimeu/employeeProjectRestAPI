@@ -39,13 +39,6 @@ public class OrderEntity {
         inverseJoinColumns = @JoinColumn(name = "product_id"))
     private List<ProductEntity> products = new ArrayList<>();
 
-    @PreRemove
-    private void checkProductsBeforeDelete() {
-        if (!products.isEmpty()) {
-            throw new IllegalStateException("Cannot delete order with associated products");
-        }
-    }
-
     public void addProduct(ProductEntity product) {
         products.add(product);
         product.getOrders().add(this);
