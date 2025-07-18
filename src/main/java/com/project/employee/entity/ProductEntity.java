@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.Hibernate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,6 +35,9 @@ public class ProductEntity {
 
     @PreRemove
     private void checkOrdersBeforeDelete() {
+        if (!Hibernate.isInitialized(orders)) {
+            Hibernate.initialize(orders);
+        }
         if (!orders.isEmpty()) {
             throw new IllegalStateException("Cannot delete product referenced in order");
         }
