@@ -1,25 +1,45 @@
 package com.project.employee.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
+@Schema(description = "DTO для создания или обновления товара")
 public class ProductRequestDto {
 
-    @NotBlank(message = "First name cannot be blank")
-    @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
+
+    @Schema(
+            description = "Название товара",
+            example = "Печенье Oreo",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @NotBlank(message = "Название не должно быть пустым")
+    @Size(min = 2, max = 50, message = "Название должно быть от 2 до 50 символов")
     private String name;
 
-    @NotBlank(message = "Description cannot be blank")
-    @Size(max = 1000, message = "Description length must be up to 1000 characters")
+    @Schema(
+            description = "Описание товара",
+            example = "Хрустящее, сладкое и вкусное печенье, которое идеально сочетается с молоком",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    @NotBlank(message = "Описание не должно быть пустым")
+    @Size(max = 1000, message = "Максимальная длина описания товара 1000 символов")
     private String description;
 
+    @Schema(
+            description = "Стоимость товара в рублях",
+            example = "150.00",
+            type = "String",
+            format = "decimal",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
     @NotNull
-    @DecimalMin(value = "0.00", message = "Price cannot be negative")
-    @Digits(integer = 9, fraction = 2, message = "Price must have up to 9 integer and 2 decimal digits")
+    @DecimalMin(value = "0.00", message = "Цена товара не должна быть отрицательной")
+    @Digits(integer = 9, fraction = 2, message = "Цена должная быть до 9 целочисленных и 2 дробных чисел")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private BigDecimal price;
 }

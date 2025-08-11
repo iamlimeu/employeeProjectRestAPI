@@ -1,5 +1,5 @@
 CREATE TABLE customers (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR(55) NOT NULL,
     last_name VARCHAR(55) NOT NULL,
     email VARCHAR(70) NOT NULL UNIQUE,
@@ -7,7 +7,7 @@ CREATE TABLE customers (
 );
 
 CREATE TABLE employees (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR(55) NOT NULL,
     last_name VARCHAR(55) NOT NULL,
     email VARCHAR(70) NOT NULL UNIQUE,
@@ -17,7 +17,7 @@ CREATE TABLE employees (
 );
 
 CREATE TABLE orders (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     customer_id BIGINT NOT NULL
                     REFERENCES customers(id) ON DELETE RESTRICT,
     status VARCHAR(50) NOT NULL
@@ -26,7 +26,7 @@ CREATE TABLE orders (
 );
 
 CREATE TABLE products (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
     price NUMERIC(19, 2)

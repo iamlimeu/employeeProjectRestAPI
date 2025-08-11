@@ -9,6 +9,7 @@ import com.project.employee.mappers.ProductMapper;
 import com.project.employee.repository.ProductRepository;
 import com.project.employee.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,13 +19,17 @@ import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper mapper;
 
     public ProductResponseDto addProduct(ProductRequestDto dto) {
+        log.debug("Начало создания товара: {}", dto);
         ProductEntity entity = mapper.toEntity(dto);
         ProductEntity savedEntity = productRepository.save(entity);
+        log.info("Товар успешно создан: ID={}, Имя={}, Цена={}", savedEntity.getId(),
+                savedEntity.getName(), savedEntity.getPrice());
         return mapper.toResponseDto(savedEntity);
     }
 
@@ -35,6 +40,8 @@ public class ProductService {
             Pageable pageable
     ) {
         Specification<ProductEntity> specs = ProductSpecification.filter(name, description, price);
+        log.debug("Поиск сотрудников по фильтрам: name={}, description={}, price={}, page={}",
+                name, description, price, pageable.getPageNumber());
         Page<ProductEntity> page = productRepository.findAll(specs, pageable);
         Page<ProductResponseDto> dtoPage = page.map(mapper::toResponseDto);
         return toPageResponse(dtoPage);
@@ -54,34 +61,59 @@ public class ProductService {
 
     public ProductResponseDto getProductById(Long id) {
         ProductEntity entity = productRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException("Product with id: " + id + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Товар с ID: {} не найден", id);
+                    return new ResourceNotFoundException("Товар с id: " + id + " не найден");
+                });
         return mapper.toResponseDto(entity);
     }
 
     public Long removeProductById(Long id) {
         ProductEntity entity = productRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException("Product with id: " + id + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Товар с ID: {} не найден", id);
+                    return new ResourceNotFoundException("Товар с id: " + id + " не найден");
+                });
         if (!entity.getOrders().isEmpty()) {
-            throw new IllegalStateException("Cannot delete product with id " + id +
-                                            " because it is associated with order");
+            log.warn("Нельзя удалить товар с ID={}, потому что он связан с заказом");
+            throw new IllegalStateException("Нельзя удалить товар с ID: " + id +
+                                            " ,потому что он связан с заказом");
         }
+        log.info("Удаление товара с ID: {}", id);
         productRepository.delete(entity);
+        log.info("Товар с ID: {} успешно удален", id);
         return entity.getId();
     }
 
     public ProductResponseDto updateProduct(Long id, ProductRequestDto dto) {
         ProductEntity productEntity = productRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException("Product with id: " + id + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Товар с ID: {} не найден", id);
+                    return new ResourceNotFoundException("Товар с id: " + id + " не найден");
+                });
+        log.debug("Начало обновления данных товара с ID: {}", id);
+        boolean updated = false;
         if (dto.getName() != null) {
             productEntity.setName(dto.getName());
+            log.debug("Обновлено имя: {}", dto.getName());
+            updated = true;
         }
         if (dto.getDescription() != null) {
             productEntity.setDescription(dto.getDescription());
+            log.debug("Обновлено описание: {}",  dto.getDescription());
+            updated = true;
         }
         if (dto.getPrice() != null) {
             productEntity.setPrice(dto.getPrice());
+            log.debug("Обновлена цена: {}", dto.getPrice());
+            updated = true;
+        }
+        if (!updated) {
+            log.debug("Ни одно поле не было изменено");
+            return mapper.toResponseDto(productEntity);
         }
         ProductEntity updatedEntity = productRepository.save(productEntity);
+        log.info("Данные товара с ID: {} успешно обновлены", id);
         return mapper.toResponseDto(updatedEntity);
     }
 

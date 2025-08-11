@@ -14,6 +14,7 @@ import com.project.employee.repository.OrderRepository;
 import com.project.employee.repository.ProductRepository;
 import com.project.employee.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
@@ -31,24 +33,37 @@ public class OrderService {
     private final OrderMapper mapper;
 
     public OrderResponseDto addOrder(OrderRequestDto orderRequestDto) {
-        CustomerEntity customerEntity = customerRepository.findById(orderRequestDto.getCustomerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " +
-                        orderRequestDto.getCustomerId()));
+        CustomerEntity customerEntity = customerRepository.findById(orderRequestDto.getCustomerId()).
+                orElseThrow(() -> {
+                    log.warn("Сотрудник с ID: {} не найден", orderRequestDto.getCustomerId());
+                    return new ResourceNotFoundException("Сотрудник с id: " +
+                            orderRequestDto.getCustomerId() + " не найден");
+                });
 
+        log.debug("Начало создания заказа: {}", orderRequestDto);
         OrderEntity newEntity = mapper.toEntity(orderRequestDto);
         newEntity.setOrderStatus(orderRequestDto.getOrderStatus());
         newEntity.setCustomer(customerEntity);
         OrderEntity savedEntity = orderRepository.save(newEntity);
+        log.info("Заказ успешно создан: ID={}", savedEntity.getId());
         return mapper.toResponseDto(savedEntity);
     }
 
     public OrderResponseDto addProductToOrder(Long orderId, Long productId) {
         OrderEntity orderEntity = orderRepository.findById(orderId).
-                orElseThrow(() -> new ResourceNotFoundException("Order with id: " + orderId + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Заказ с ID: {} не найден", orderId);
+                    return new ResourceNotFoundException("Заказ с id: " + orderId + " не найден");
+                });
         ProductEntity productEntity = productRepository.findById(productId).
-                orElseThrow(() -> new ResourceNotFoundException("Product with id: " + productId + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Товар с ID: {} не найден", productId);
+                    return new ResourceNotFoundException("Товар с id: " + productId + " не найден");
+                });
+        log.info("Добавление товара в заказ");
         orderEntity.addProduct(productEntity);
         OrderEntity savedEntity = orderRepository.save(orderEntity);
+        log.info("Товар с ID={} успешно добавлен в заказ с ID={}", productId, orderId);
         return mapper.toResponseDto(savedEntity);
     }
 
@@ -59,6 +74,8 @@ public class OrderService {
             Pageable pageable
     ) {
         Specification<OrderEntity> specs = OrderSpecification.filter(createdDate, status, productId);
+        log.debug("Поиск заказов по фильтрам: created date={}, status={}, product ID={}, page={}",
+                createdDate, status, productId, pageable.getPageNumber());
         Page<OrderEntity> page = orderRepository.findAll(specs, pageable);
         Page<OrderResponseDto> dtoPage = page.map(mapper::toResponseDto);
         return toPageResponse(dtoPage);
@@ -78,34 +95,62 @@ public class OrderService {
 
     public OrderResponseDto getOrderById(Long id) {
         OrderEntity orderEntity = orderRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException("Order with id: " + id + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Заказ с ID: {} не найден", id);
+                    return new ResourceNotFoundException("Заказ с id: " + id + " не найден");
+                });
         return mapper.toResponseDto(orderEntity);
     }
 
     public Long removeOrder(Long id) {
         OrderEntity orderEntity = orderRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException("Order with id: " + id + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Заказ с ID: {} не найден", id);
+                    return new ResourceNotFoundException("Заказ с id: " + id + " не найден");
+                });
+        log.info("Удаление заказа с ID: {}", id);
         orderRepository.delete(orderEntity);
+        log.info("Заказ с ID: {} успешно удален", id);
         return orderEntity.getId();
     }
 
     public List<ProductEntity> removeProductInOrder(Long orderId, Long productId) {
         OrderEntity orderEntity = orderRepository.findById(orderId).
-                orElseThrow(() -> new ResourceNotFoundException("Order with id: " + orderId + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Заказ с ID: {} не найден", orderId);
+                    return new ResourceNotFoundException("Заказ с id: " + orderId + " не найден");
+                });
         ProductEntity productEntity = productRepository.findById(productId).
-                orElseThrow(() -> new ResourceNotFoundException("Product with id: " + productId + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Товар с ID: {} не найден", productId);
+                    return new ResourceNotFoundException("Товар с id: " + productId + " не найден");
+                });
+        log.info("Удаление товара из заказа");
         orderEntity.removeProduct(productEntity);
         orderRepository.save(orderEntity);
+        log.info("Товар с ID={} успешно удален из заказа с ID={}", productId, orderId);
         return orderEntity.getProducts();
     }
 
     public OrderResponseDto updateOrder(Long id, OrderRequestDto dto) {
         OrderEntity entity = orderRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException("Order with id: " + id + " not found"));
+                orElseThrow(() -> {
+                    log.warn("Заказ с ID: {} не найден", id);
+                    return new ResourceNotFoundException("Заказ с id: " + id + " не найден");
+                });
+        log.debug("Начало обновления данных заказа с ID: {}", id);
+        boolean updated = false;
         if (entity.getOrderStatus() != null) {
             entity.setOrderStatus(dto.getOrderStatus());
+            log.debug("Обновлен статус: {}", entity.getOrderStatus());
+            updated =true;
+        }
+        if (!updated) {
+            log.debug("Ни одно поле не было изменено");
+            return mapper.toResponseDto(entity);
         }
         OrderEntity updatedOrder = orderRepository.save(entity);
+        log.info("Данные заказа с ID: {} успешно обновлены", id);
         return mapper.toResponseDto(updatedOrder);
     }
 }
