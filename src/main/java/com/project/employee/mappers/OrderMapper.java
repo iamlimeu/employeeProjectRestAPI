@@ -14,21 +14,21 @@ public interface OrderMapper {
 
     OrderEntity toEntity(OrderRequestDto dto);
 
-    @Mapping(target = "info", source = ".",
-            qualifiedByName = "getOrderInfo")
+//    @Mapping(target = "info", source = ".",
+//            qualifiedByName = "getOrderInfo")
     @Mapping(target = "customerInfo", source = "customer",
              qualifiedByName = "mapCustomerInfo")
     @Mapping(target = "productInfo", source = "products",
             qualifiedByName = "mapProductInfo")
     OrderResponseDto  toResponseDto(OrderEntity entity);
 
-    @Named("getOrderInfo")
-    default String getOrderInfo(OrderEntity entity) {
-        Long customerId = entity.getCustomer() != null ? entity.getCustomer().getId() : null;
-        return "Created date: " + entity.getCreatedDate() +
-                " ,order status: " + entity.getOrderStatus() +
-                " , Customer id: " + customerId;
-    }
+//    @Named("getOrderInfo")
+//    default String getOrderInfo(OrderEntity entity) {
+//        Long customerId = entity.getCustomer() != null ? entity.getCustomer().getId() : null;
+//        return "Created date: " + entity.getCreatedDate() +
+//                " ,order status: " + entity.getOrderStatus() +
+//                " , Customer id: " + customerId;
+//    }
 
     @Named("mapCustomerInfo")
     default OrderResponseDto.CustomerInfo mapCustomerInfo(CustomerEntity entity) {

@@ -10,7 +10,10 @@ import java.util.List;
 @Data
 public class CustomerResponseDto {
     private Long id;
-    private String info;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phoneNumber;
     private List<OrderInfo> orders;
 
 

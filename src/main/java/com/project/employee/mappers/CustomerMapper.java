@@ -13,18 +13,18 @@ public interface CustomerMapper {
 
     CustomerEntity toEntity(CustomerRequestDto dto);
 
-    @Mapping(target = "info", source = ".",
-             qualifiedByName = "getCustomerInfo")
+//    @Mapping(target = "info", source = ".",
+//             qualifiedByName = "getCustomerInfo")
     @Mapping(target = "orders", source = "orders")
     CustomerResponseDto toResponseDto(CustomerEntity entity);
 
-    @Named("getCustomerInfo")
-    default String getCustomerInfo(CustomerEntity entity) {
-        return entity.getFirstName() + " " + entity.getLastName() +
-                " ,email: " + entity.getEmail() +
-                " ,phone number: " + entity.getPhoneNumber() +
-                " ,orders: " +  (entity.getOrders() == null ? 0 : entity.getOrders().size());
-    }
+//    @Named("getCustomerInfo")
+//    default String getCustomerInfo(CustomerEntity entity) {
+//        return entity.getFirstName() + " " + entity.getLastName() +
+//                " ,email: " + entity.getEmail() +
+//                " ,phone number: " + entity.getPhoneNumber() +
+//                " ,orders: " +  (entity.getOrders() == null ? 0 : entity.getOrders().size());
+//    }
 
     @Mapping(source = "orderStatus", target = "status")
     CustomerResponseDto.OrderInfo mapOrderInfo(OrderEntity orderEntity);

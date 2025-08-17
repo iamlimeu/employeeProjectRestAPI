@@ -98,28 +98,28 @@ public class CustomerService {
                 });
         log.debug("Начало обновления данных клиента с ID: {}", id);
         boolean updated = false;
-        if (dto.getFirstName() != null) {
+        if (dto.getFirstName() != null && !dto.getFirstName().equals(customerEntity.getFirstName())) {
             customerEntity.setFirstName(dto.getFirstName());
             log.debug("Обновлено имя: {}",  dto.getFirstName());
             updated = true;
         }
-        if (dto.getLastName() != null) {
+        if (dto.getLastName() != null && !dto.getLastName().equals(customerEntity.getLastName())) {
             customerEntity.setLastName(dto.getLastName());
             log.debug("Обновлена фамилия: {}",  dto.getLastName());
             updated = true;
         }
-        if (dto.getEmail() != null) {
+        if (dto.getEmail() != null && !dto.getEmail().equals(customerEntity.getEmail())) {
             customerEntity.setEmail(dto.getEmail());
             log.debug("Обновлена почта: {}",  dto.getEmail());
             updated = true;
         }
-        if (dto.getPhoneNumber() != null) {
+        if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().equals(customerEntity.getPhoneNumber())) {
             customerEntity.setPhoneNumber(dto.getPhoneNumber());
             log.debug("Обновлен номер телефона: {}",  dto.getPhoneNumber());
             updated = true;
         }
         if (!updated) {
-            log.debug("Ни одно поле не было изменено");
+            log.info("Ни одно поле не было изменено для клиента с ID: {}", id);
             return mapper.toResponseDto(customerEntity);
         }
         CustomerEntity updatedEntity = customerRepository.save(customerEntity);

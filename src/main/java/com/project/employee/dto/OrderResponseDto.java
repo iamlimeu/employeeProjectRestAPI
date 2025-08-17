@@ -1,14 +1,17 @@
 package com.project.employee.dto;
 
+import com.project.employee.enums.OrderStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 public class OrderResponseDto {
     private Long id;
-    private String info;
+    private LocalDateTime createdDate;
+    private OrderStatus orderStatus;
     private CustomerInfo customerInfo;
     private List<ProductInfo> productInfo;
 

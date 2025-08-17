@@ -90,12 +90,12 @@ public class EmployeeService {
         log.debug("Начало обновления данных сотрудника с ID: {}", id);
         boolean updated = false;
 
-        if (dto.getFirstName() != null) {
+        if (dto.getFirstName() != null && !dto.getFirstName().equals(entity.getFirstName())) {
             entity.setFirstName(dto.getFirstName());
             log.debug("Обновлено имя: {}",  dto.getFirstName());
             updated = true;
         }
-        if (dto.getLastName() != null) {
+        if (dto.getLastName() != null && !dto.getLastName().equals(entity.getLastName())) {
             entity.setLastName(dto.getLastName());
             log.debug("Обновлена фамилия: {}",  dto.getLastName());
             updated = true;
@@ -105,18 +105,19 @@ public class EmployeeService {
             log.debug("Обновлена почта: {}",  dto.getEmail());
             updated = true;
         }
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty() &&
+                !dto.getPassword().equals(entity.getPassword())) {
             entity.setPassword(dto.getPassword());
             log.debug("Обновлен пароль: {}",  dto.getPassword());
             updated = true;
         }
-        if (dto.getRole() != null) {
+        if (dto.getRole() != null && !dto.getRole().equals(entity.getRole())) {
             entity.setRole(dto.getRole());
             log.debug("Обновлена должность: {}",  dto.getRole());
             updated = true;
         }
         if (!updated) {
-            log.debug("Ни одно поле не было изменено");
+            log.info("Ни одно поле не было изменено для сотрудника с ID: {}", id);
             return mapper.toResponseDto(entity);
         }
         EmployeeEntity updatedEntity = employeeRepository.save(entity);

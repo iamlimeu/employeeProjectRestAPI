@@ -93,28 +93,27 @@ public class ProductService {
                 });
         log.debug("Начало обновления данных товара с ID: {}", id);
         boolean updated = false;
-        if (dto.getName() != null) {
+        if (dto.getName() != null && !dto.getName().equals(productEntity.getName())) {
             productEntity.setName(dto.getName());
             log.debug("Обновлено имя: {}", dto.getName());
             updated = true;
         }
-        if (dto.getDescription() != null) {
+        if (dto.getDescription() != null && !dto.getDescription().equals(productEntity.getDescription())) {
             productEntity.setDescription(dto.getDescription());
             log.debug("Обновлено описание: {}",  dto.getDescription());
             updated = true;
         }
-        if (dto.getPrice() != null) {
+        if (dto.getPrice() != null && !dto.getPrice().equals(productEntity.getPrice())) {
             productEntity.setPrice(dto.getPrice());
             log.debug("Обновлена цена: {}", dto.getPrice());
             updated = true;
         }
         if (!updated) {
-            log.debug("Ни одно поле не было изменено");
+            log.info("Ни одно поле не было изменено для товара с ID: {}", id);
             return mapper.toResponseDto(productEntity);
         }
         ProductEntity updatedEntity = productRepository.save(productEntity);
         log.info("Данные товара с ID: {} успешно обновлены", id);
         return mapper.toResponseDto(updatedEntity);
     }
-
 }

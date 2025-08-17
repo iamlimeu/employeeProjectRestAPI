@@ -140,13 +140,13 @@ public class OrderService {
                 });
         log.debug("Начало обновления данных заказа с ID: {}", id);
         boolean updated = false;
-        if (entity.getOrderStatus() != null) {
+        if (dto.getOrderStatus() != null && !dto.getOrderStatus().equals(entity.getOrderStatus())) {
             entity.setOrderStatus(dto.getOrderStatus());
             log.debug("Обновлен статус: {}", entity.getOrderStatus());
             updated =true;
         }
         if (!updated) {
-            log.debug("Ни одно поле не было изменено");
+            log.info("Ни одно поле не было изменено для заказа с ID: {}", id);
             return mapper.toResponseDto(entity);
         }
         OrderEntity updatedOrder = orderRepository.save(entity);
