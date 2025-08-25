@@ -2,12 +2,15 @@ package com.project.employee.mappers;
 
 import com.project.employee.dto.OrderRequestDto;
 import com.project.employee.dto.OrderResponseDto;
+import com.project.employee.dto.ProductResponseDto;
 import com.project.employee.entity.CustomerEntity;
 import com.project.employee.entity.OrderEntity;
 import com.project.employee.entity.ProductEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
@@ -19,7 +22,7 @@ public interface OrderMapper {
     @Mapping(target = "customerInfo", source = "customer",
              qualifiedByName = "mapCustomerInfo")
     @Mapping(target = "productInfo", source = "products",
-            qualifiedByName = "mapProductInfo")
+            qualifiedByName = "mapProductInfoList")
     OrderResponseDto  toResponseDto(OrderEntity entity);
 
 //    @Named("getOrderInfo")
@@ -55,4 +58,26 @@ public interface OrderMapper {
         info.setPrice(entity.getPrice());
         return info;
     }
+
+    @Named("mapProductInfoList")
+    default List<OrderResponseDto.ProductInfo> mapProductInfoList(List<ProductEntity> entities) {
+        if (entities == null) {
+            return List.of();
+        }
+            return entities.stream()
+                    .map(this::mapProductInfo)
+                    .toList();
+        }
+
+        ProductResponseDto toProductResponseDto(ProductEntity entity);
+
+    default List<ProductResponseDto> toProductResponseDtoList(List<ProductEntity> entities) {
+        if (entities == null) {
+            return List.of();
+        }
+        return entities.stream()
+                .map(this::toProductResponseDto)
+                .toList();
+    }
 }
+

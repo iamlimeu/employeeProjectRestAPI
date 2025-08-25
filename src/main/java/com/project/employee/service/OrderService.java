@@ -3,6 +3,7 @@ package com.project.employee.service;
 import com.project.employee.dto.OrderRequestDto;
 import com.project.employee.dto.OrderResponseDto;
 import com.project.employee.dto.PageResponse;
+import com.project.employee.dto.ProductResponseDto;
 import com.project.employee.entity.CustomerEntity;
 import com.project.employee.entity.OrderEntity;
 import com.project.employee.entity.ProductEntity;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -114,7 +116,8 @@ public class OrderService {
         return orderEntity.getId();
     }
 
-    public List<ProductEntity> removeProductInOrder(Long orderId, Long productId) {
+    @Transactional
+    public List<ProductResponseDto> removeProductInOrder(Long orderId, Long productId) {
         OrderEntity orderEntity = orderRepository.findById(orderId).
                 orElseThrow(() -> {
                     log.warn("Заказ с ID: {} не найден", orderId);
@@ -129,7 +132,7 @@ public class OrderService {
         orderEntity.removeProduct(productEntity);
         orderRepository.save(orderEntity);
         log.info("Товар с ID={} успешно удален из заказа с ID={}", productId, orderId);
-        return orderEntity.getProducts();
+        return mapper.toProductResponseDtoList(orderEntity.getProducts());
     }
 
     public OrderResponseDto updateOrder(Long id, OrderRequestDto dto) {

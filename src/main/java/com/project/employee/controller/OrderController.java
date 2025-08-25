@@ -3,6 +3,7 @@ package com.project.employee.controller;
 import com.project.employee.dto.OrderRequestDto;
 import com.project.employee.dto.OrderResponseDto;
 import com.project.employee.dto.PageResponse;
+import com.project.employee.dto.ProductResponseDto;
 import com.project.employee.entity.ProductEntity;
 import com.project.employee.enums.OrderStatus;
 import com.project.employee.service.OrderService;
@@ -83,10 +84,10 @@ public class OrderController {
 
     @DeleteMapping("/orders/{orderId}/products/{productId}")
     @Operation(summary = "Удалить товар в заказе", description = "Позволяет удалить товар в заказе по ID")
-    public ResponseEntity<List<ProductEntity>> removeProductInOrder(@PathVariable("orderId") Long orderId,
-                                                                   @PathVariable("productId") long productId) {
+    public ResponseEntity<List<ProductResponseDto>> removeProductInOrder(@PathVariable("orderId") Long orderId,
+                                                                         @PathVariable("productId") long productId) {
         log.warn("Запрос на удаление продукта с ID: {} в заказе с ID: {}", productId, orderId);
-        List<ProductEntity> removedProduct = orderService.removeProductInOrder(orderId, productId);
+        List<ProductResponseDto> removedProduct = orderService.removeProductInOrder(orderId, productId);
         log.info("Продукт с ID: {} был успешно удален из заказа с ID: {}", productId, orderId);
         return ResponseEntity.ok(removedProduct);
     }

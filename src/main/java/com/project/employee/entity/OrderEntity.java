@@ -29,11 +29,11 @@ public class OrderEntity {
     @Column(name = "status", nullable = false)
     private OrderStatus orderStatus;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "customer_id")
     private CustomerEntity customer;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany
     @JoinTable(name = "product_order",
         joinColumns = @JoinColumn(name = "order_id"),
         inverseJoinColumns = @JoinColumn(name = "product_id"))
